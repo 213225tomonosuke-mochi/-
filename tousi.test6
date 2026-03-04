@@ -1,0 +1,47 @@
+import math
+
+def simulate_competitive_strategy():
+    money = 50
+    income = 10
+    total_turns = 30
+    
+    # --- 戦略を混ぜるための「黄金比」調整 ---
+    COST = 40
+    INCOME_BOOST = 2
+    CASH_BOOST = 45    # 55から45に下方修正（40払って5円しか増えない）
+    
+    history = []
+
+    for turn in range(1, total_turns + 1):
+        money += income
+        
+        # 評価値の計算
+        diff = COST - income
+        payback_p = math.ceil(diff / 15) if diff > 0 else 1
+        v_income = 58 - (2 * turn)
+        
+        # ボーナスの価値も「P」で割って減衰させる
+        bonus_value = v_income / payback_p
+        
+        # v_cash の基本値を 15 から 5 に下げて、Income と競わせる
+        v_cash = 5 + bonus_value 
+            
+        decision = "Wait"
+        if money >= COST:
+            # ここで判定：v_income と v_cash がほぼ同じなら「混ざる」
+            if v_income >= v_cash:
+                money -= COST
+                income += INCOME_BOOST
+                decision = "Income Up"
+            else:
+                money -= COST
+                money += CASH_BOOST
+                decision = "Instant Cash"
+
+        history.append(f"Turn {turn:02d}: {decision:12s} | v_inc: {v_income:4.1f} | v_csh: {v_cash:4.1f} | Money: {money:3d}")
+
+    return history
+
+results = simulate_competitive_strategy()
+for line in results:
+    print(line)
